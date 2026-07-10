@@ -48,9 +48,27 @@ func main() {
 	fmt.Println("reflect float64", reflect.TypeOf(myFloat))
 	println(float64(myIny) + myFloat)
 
-	var myBool = true
+	var myBool bool = true
 	println(myBool)
 	fmt.Println(ternary(myBool, "The variable is true", "The variable is false"))
+
+	// variable declared and initialized abreviaded way
+	myString := "Variable"
+	fmt.Println(myString)
+
+	//Constants
+	const myConstant = "Constant"
+	fmt.Println(myConstant)
+
+	//Control Flow
+	if true {
+		println("True")
+	} else if myString == "X" {
+		println("myString = X")
+	} else {
+		println("else")
+	}
+
 }
 
 // ternary mimics the ?: operator Go doesn't have: a function call is an
