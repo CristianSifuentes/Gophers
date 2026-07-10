@@ -1,5 +1,11 @@
 package main
 
+import (
+	"container/list"
+	"fmt"
+	"reflect"
+)
+
 func main() {
 	println("Hi, this is the firt print in console using go")
 
@@ -36,4 +42,132 @@ func main() {
 
 	println("%s", name, myIny, "he")
 
+	fmt.Println("reflect int32", reflect.TypeOf(myIny))
+
+	var myFloat = 6.5
+	println(myFloat)
+	fmt.Println("reflect float64", reflect.TypeOf(myFloat))
+	println(float64(myIny) + myFloat)
+
+	var myBool bool = true
+	println(myBool)
+	fmt.Println(ternary(myBool, "The variable is true", "The variable is false"))
+
+	// variable declared and initialized abreviaded way
+	myString := "Variable"
+	fmt.Println(myString)
+
+	//Constants
+	const myConstant = "Constant"
+	fmt.Println(myConstant)
+
+	//Control Flow
+	if true && myBool {
+		println("True")
+	} else if myString == "X" {
+		println("myString = X")
+	} else {
+		println("else")
+	}
+
+	// Data Structre
+	// Array
+
+	var myArray [3]int
+	println(len(myArray))
+	println("Array[2]", myArray[2])
+
+	myArray[2] = 3
+	// myArray[4] = 3
+	// invalid argument: index 4 out of bounds [0:3]compilerInvalidIndex
+	// is a smart lenguaje
+
+	println("Before Array[2]", myArray[2])
+
+	// Map
+	myMap := make(map[string]int)
+	myMap["Cris"] = 35
+	myMap["Artias"] = 20
+	myMap["John"] = 29
+	println(myMap)
+
+	myMap2 := map[string]int{"Cris": 36, "Artias": 30}
+	myMap2["Cris"] = 36
+	println(myMap2)
+
+	//List
+	myList := list.New()
+	myList.PushBack(1)
+	myList.PushBack(2)
+	myList.PushBack(3)
+	myList.PushBack(4)
+	//In Go, a pointer is a variable that stores the memory address of another value instead of the value itself.
+	println(myList.Back().Value)
+
+	// Bucles
+	for i := 0; i < myList.Len(); i++ {
+		println(i)
+
+	}
+
+	for i := 0; i < len(myMap2); i++ {
+		println(i)
+
+	}
+
+	for index, value := range myArray {
+		fmt.Println(index, value)
+	}
+
+	// Data Structure: Struct (custom type)
+	// A struct literal with field names is order-independent and self-documenting.
+	cris := Person{Name: "Cris", Age: 35}
+	fmt.Println(cris)
+	fmt.Println(cris.Greet())
+
+	// Pointer receiver method: mutates cris directly, no manual & needed —
+	// Go automatically takes the address of an addressable value like cris.
+	cris.Birthday()
+	fmt.Println("After birthday:", cris.Age)
+
+	// Zero-value struct: every field gets its own type's zero value (Name: "", Age: 0).
+	var empty Person
+	fmt.Println(empty)
+
+	// A slice of structs, combining what we learned about slices and custom types.
+	people := []Person{
+		{Name: "Artias", Age: 20},
+		{Name: "John", Age: 29},
+	}
+	for _, person := range people {
+		fmt.Println(person.Greet())
+	}
+
+}
+
+// ternary mimics the ?: operator Go doesn't have: a function call is an
+// expression, so its result can be passed directly into another call.
+func ternary(cond bool, whenTrue, whenFalse string) string {
+	if cond {
+		return whenTrue
+	}
+	return whenFalse
+}
+
+// Person is a custom type: a struct groups named fields under one type.
+type Person struct {
+	Name string
+	Age  int
+}
+
+// Greet uses a value receiver: p is a copy of the Person it's called on,
+// so this method can never modify the caller's original value.
+func (p Person) Greet() string {
+	return "Hi, I'm " + p.Name
+}
+
+// Birthday uses a pointer receiver: p points at the caller's original Person,
+// so mutations here (p.Age++) are visible to the caller after the call returns.
+func (p *Person) Birthday() {
+	p.Age++
 }
