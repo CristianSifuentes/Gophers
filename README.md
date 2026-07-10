@@ -1,5 +1,9 @@
 # Gophers 
 
+![Go](https://img.shields.io/badge/Go-1.26.5-00ADD8?logo=go&logoColor=white)
+![License](https://img.shields.io/badge/license-Apache--2.0-blue)
+![Status](https://img.shields.io/badge/status-learning%20sandbox-yellow)
+
 Members and developers of the Go programming language community are popularly known as **"Gophers."**
 
 This repository is a starting point for learning and running basic Go programs.
@@ -7,6 +11,7 @@ This repository is a starting point for learning and running basic Go programs.
 ## Table of Contents
 
 - [Overview](#overview)
+- [Project Evolution (Commit History)](#project-evolution-commit-history)
 - [Prerequisites](#prerequisites)
 - [Project Structure](#project-structure)
 - [Getting Started](#getting-started)
@@ -37,6 +42,22 @@ This repository is a starting point for learning and running basic Go programs.
 ## Overview
 
 This project is a hands-on sandbox (`hello.go`) for learning core Go fundamentals: variable declaration styles, static typing, type inference, explicit type conversion, and the difference between the built-in `println` and the standard `fmt` package. It also documents the standard Go toolchain workflow — initializing a module, building a binary, and running code directly.
+
+## Project Evolution (Commit History)
+
+This project grew incrementally, commit by commit, mirroring the natural order in which a newcomer learns Go. Each commit below introduced (or reinforced) a specific concept — reading them in order is itself a short Go tutorial.
+
+| Commit | Message | Concept Introduced |
+|---|---|---|
+| `0b5fd9b` | **Initial commit** | Repository scaffolding: `.gitignore`, `LICENSE` (Apache-2.0), and an empty `README.md`. No Go code yet — just the project's legal and hygiene baseline. |
+| `5e73f2a` | **Add initial code** | The first `hello.go` is born — a minimal 5-line file, the seed the rest of the sandbox grows from. |
+| `3ee9fdb` | **Initial create, build and run go project** | The file becomes a real **Go module**: `go mod init` produces `go.mod` (`module main`, `go 1.26.5`), the project is built (`go build`, producing the `main` binary), and run for the first time. The README also receives its first full pass — prerequisites, structure, and the build/run workflow. |
+| `aed46ac` | **Delete ugly icon** | Small housekeeping — a cosmetic README cleanup, a reminder that documentation quality matters even in a learning repo. |
+| `b6f54e0` | **Working with variables, string, int32 and format combination** | The heart of the language lesson: `hello.go` expands to demonstrate **variable declaration** (`var name string = "variable"`), **reassignment**, **type inference** (`var otherVariable2 = ""`), an explicit **`int32`** declaration and arithmetic (`myIny * 10`), **type conversion** (`string(myIny)`), and the classic **`println` has no format verbs** pitfall (`println("%s", name, myIny, "he")`). The compiled `main` binary is updated to match. |
+| `16e8946` | **Update documentation** | The README is rewritten to fully explain every concept above in depth: variable styles, static typing vs. inference, type conversion pitfalls, `println` vs. `fmt`, the anatomy of `go.mod`, and a full Go CLI command reference. |
+| `9eee060`, `60134df`, `8b9b20a`, `f77e782` | **Branch merges** (`feature/one` ↔ `develop` ↔ `main`) | No new code — these commits synchronize the three long-lived branches so that documentation and code fixes made on one branch propagate to the others, keeping the branch graph consistent. |
+
+> **Reading tip:** if you want to relive the learning path, check out each commit in order (`git checkout <hash>`) and diff `hello.go` against the previous one — you'll see the file grow one Go concept at a time.
 
 ## Prerequisites
 
