@@ -83,6 +83,13 @@ func main() {
 
 	println("Before Array[2]", myArray[2])
 
+	// Map
+	myMap := make(map[string]int)
+	myMap["Cris"] = 35
+	myMap["Artias"] = 20
+	myMap["John"] = 29
+	fmt.Println(myMap)
+
 }
 
 // ternary mimics the ?: operator Go doesn't have: a function call is an
