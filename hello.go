@@ -110,6 +110,15 @@ func main() {
 
 	}
 
+	for i := 0; i < len(myMap2); i++ {
+		println(i)
+
+	}
+
+	for index, value := range myArray {
+		fmt.Println(index, value)
+	}
+
 }
 
 // ternary mimics the ?: operator Go doesn't have: a function call is an
