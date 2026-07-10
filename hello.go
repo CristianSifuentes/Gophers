@@ -1,5 +1,7 @@
 package main
 
+import "reflect"
+
 func main() {
 	println("Hi, this is the firt print in console using go")
 
@@ -36,4 +38,10 @@ func main() {
 
 	println("%s", name, myIny, "he")
 
+	print("reflect int32", reflect.TypeOf(myIny))
+
+	var myFloat = 6.5
+	println(myFloat)
+	println("reflect float64", reflect.TypeOf(myFloat))
+	println(float64(myIny) + myFloat)
 }
