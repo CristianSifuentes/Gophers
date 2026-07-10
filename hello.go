@@ -1,6 +1,9 @@
 package main
 
-import "reflect"
+import (
+	"fmt"
+	"reflect"
+)
 
 func main() {
 	println("Hi, this is the firt print in console using go")
@@ -38,10 +41,16 @@ func main() {
 
 	println("%s", name, myIny, "he")
 
-	print("reflect int32", reflect.TypeOf(myIny))
+	fmt.Println("reflect int32", reflect.TypeOf(myIny))
 
 	var myFloat = 6.5
 	println(myFloat)
-	println("reflect float64", reflect.TypeOf(myFloat))
+	fmt.Println("reflect float64", reflect.TypeOf(myFloat))
 	println(float64(myIny) + myFloat)
+
+	var myBool = true
+	println(myBool)
+	if myBool {
+		fmt.Println("The variable is true")
+	}
 }
