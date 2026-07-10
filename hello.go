@@ -69,6 +69,16 @@ func main() {
 		println("else")
 	}
 
+	// Data Structre
+	// Array
+
+	var myArray [3]int
+	println(len(myArray))
+	println("Array[2]", myArray[2])
+
+	myArray[2] = 3
+	println("Before Array[2]", myArray[2])
+
 }
 
 // ternary mimics the ?: operator Go doesn't have: a function call is an
