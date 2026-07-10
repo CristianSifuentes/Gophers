@@ -50,11 +50,14 @@ func main() {
 
 	var myBool = true
 	println(myBool)
-	// In Go, := is for declaring and initializing a new variable. It automatically infers the type based on the assigned value. In contrast,
-	// = is an assignment operator used to update the value of an already declared variable
-	msg := "The variable is false"
-	if myBool {
-		msg = "The variable is true"
+	fmt.Println(ternary(myBool, "The variable is true", "The variable is false"))
+}
+
+// ternary mimics the ?: operator Go doesn't have: a function call is an
+// expression, so its result can be passed directly into another call.
+func ternary(cond bool, whenTrue, whenFalse string) string {
+	if cond {
+		return whenTrue
 	}
-	fmt.Println(msg)
+	return whenFalse
 }
