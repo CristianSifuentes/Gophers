@@ -119,6 +119,30 @@ func main() {
 		fmt.Println(index, value)
 	}
 
+	// Data Structure: Struct (custom type)
+	// A struct literal with field names is order-independent and self-documenting.
+	cris := Person{Name: "Cris", Age: 35}
+	fmt.Println(cris)
+	fmt.Println(cris.Greet())
+
+	// Pointer receiver method: mutates cris directly, no manual & needed —
+	// Go automatically takes the address of an addressable value like cris.
+	cris.Birthday()
+	fmt.Println("After birthday:", cris.Age)
+
+	// Zero-value struct: every field gets its own type's zero value (Name: "", Age: 0).
+	var empty Person
+	fmt.Println(empty)
+
+	// A slice of structs, combining what we learned about slices and custom types.
+	people := []Person{
+		{Name: "Artias", Age: 20},
+		{Name: "John", Age: 29},
+	}
+	for _, person := range people {
+		fmt.Println(person.Greet())
+	}
+
 }
 
 // ternary mimics the ?: operator Go doesn't have: a function call is an
@@ -128,4 +152,22 @@ func ternary(cond bool, whenTrue, whenFalse string) string {
 		return whenTrue
 	}
 	return whenFalse
+}
+
+// Person is a custom type: a struct groups named fields under one type.
+type Person struct {
+	Name string
+	Age  int
+}
+
+// Greet uses a value receiver: p is a copy of the Person it's called on,
+// so this method can never modify the caller's original value.
+func (p Person) Greet() string {
+	return "Hi, I'm " + p.Name
+}
+
+// Birthday uses a pointer receiver: p points at the caller's original Person,
+// so mutations here (p.Age++) are visible to the caller after the call returns.
+func (p *Person) Birthday() {
+	p.Age++
 }
