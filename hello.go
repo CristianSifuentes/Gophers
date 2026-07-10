@@ -77,6 +77,10 @@ func main() {
 	println("Array[2]", myArray[2])
 
 	myArray[2] = 3
+	// myArray[4] = 3
+	// invalid argument: index 4 out of bounds [0:3]compilerInvalidIndex
+	// is a smart lenguaje
+
 	println("Before Array[2]", myArray[2])
 
 }
