@@ -50,7 +50,11 @@ func main() {
 
 	var myBool = true
 	println(myBool)
+	// In Go, := is for declaring and initializing a new variable. It automatically infers the type based on the assigned value. In contrast,
+	// = is an assignment operator used to update the value of an already declared variable
+	msg := "The variable is false"
 	if myBool {
-		fmt.Println("The variable is true")
+		msg = "The variable is true"
 	}
+	fmt.Println(msg)
 }
