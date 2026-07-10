@@ -99,8 +99,16 @@ func main() {
 	myList := list.New()
 	myList.PushBack(1)
 	myList.PushBack(2)
+	myList.PushBack(3)
+	myList.PushBack(4)
 	//In Go, a pointer is a variable that stores the memory address of another value instead of the value itself.
 	println(myList.Back().Value)
+
+	// Bucles
+	for i := 0; i < myList.Len(); i++ {
+		println(i)
+
+	}
 
 }
 
