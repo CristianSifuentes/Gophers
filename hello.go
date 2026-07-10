@@ -1,6 +1,7 @@
 package main
 
 import (
+	"container/list"
 	"fmt"
 	"reflect"
 )
@@ -93,6 +94,13 @@ func main() {
 	myMap2 := map[string]int{"Cris": 36, "Artias": 30}
 	myMap2["Cris"] = 36
 	println(myMap2)
+
+	//List
+	myList := list.New()
+	myList.PushBack(1)
+	myList.PushBack(2)
+	//In Go, a pointer is a variable that stores the memory address of another value instead of the value itself.
+	println(myList.Back().Value)
 
 }
 
