@@ -6,7 +6,7 @@
 
 Members and developers of the Go programming language community are popularly known as **"Gophers."**
 
-This repository is a hands-on, commit-by-commit journey through core Go fundamentals — variables, types, control flow, data structures, and the standard toolchain — captured in a single evolving file, `hello.go`.
+This repository is a hands-on, commit-by-commit journey through core Go fundamentals — variables, types, control flow, data structures, custom types, and the standard toolchain — captured in a single evolving file, `hello.go`.
 
 ## Table of Contents
 
@@ -30,6 +30,10 @@ This repository is a hands-on, commit-by-commit journey through core Go fundamen
   - [No Ternary Operator — and How to Fake One](#no-ternary-operator--and-how-to-fake-one)
   - [Arrays](#arrays)
   - [Maps](#maps)
+  - [`container/list`: a Doubly Linked List](#containerlist-a-doubly-linked-list)
+  - [Loops: Go's Only Looping Keyword, `for`](#loops-gos-only-looping-keyword-for)
+  - [Structs: Custom Types](#structs-custom-types)
+  - [Methods and Receivers: Value vs. Pointer](#methods-and-receivers-value-vs-pointer)
 - [Understanding `go.mod`](#understanding-go-mod)
   - [Key Elements](#key-elements)
   - [Example `go.mod` File](#example-go-mod-file)
@@ -59,7 +63,10 @@ This project is a hands-on sandbox (`hello.go`) for learning core Go fundamental
 - Control flow (`if` / `else if` / `else`)
 - Emulating a ternary operator, since Go deliberately has none
 - Fixed-size arrays and bounds checking
-- Maps (Go's built-in hash table) and `make`
+- Maps (Go's built-in hash table), both via `make` and map literals
+- `container/list`, the standard library's doubly linked list, and pointer semantics
+- Go's single looping keyword, `for`, in its C-style, condition-only, and `range` forms
+- Custom types with `struct`, and methods with value vs. pointer receivers
 
 It also documents the standard Go toolchain workflow — initializing a module, building a binary, and running code directly — and calls out the beginner pitfalls this file deliberately walks into (and how to fix each one).
 
@@ -71,23 +78,29 @@ This project grew incrementally, commit by commit, mirroring the natural order i
 |---|---|---|
 | `0b5fd9b` | **Initial commit** | Repository scaffolding: `.gitignore`, `LICENSE` (Apache-2.0), and an empty `README.md`. No Go code yet — just the project's legal and hygiene baseline. |
 | `5e73f2a` | **Add initial code** | The first `hello.go` is born — a minimal 5-line file, the seed the rest of the sandbox grows from. |
-| `3ee9fdb` | **Initial create, build and run go project** | The file becomes a real **Go module**: `go mod init` produces `go.mod` (`module main`, `go 1.26.5`), the project is built (`go build`, producing the `main` binary), and run for the first time. The README also receives its first full pass — prerequisites, structure, and the build/run workflow. |
-| `aed46ac` | **Delete ugly icon** | Small housekeeping — a cosmetic README cleanup, a reminder that documentation quality matters even in a learning repo. |
-| `b6f54e0` | **Working with variables, string, int32 and format combination** | The heart of the first language lesson: `hello.go` expands to demonstrate **variable declaration** (`var name string = "variable"`), **reassignment**, **type inference** (`var otherVariable2 = ""`), an explicit **`int32`** declaration and arithmetic (`myIny * 10`), **type conversion** (`string(myIny)`), and the classic **`println` has no format verbs** pitfall (`println("%s", name, myIny, "he")`). |
-| `16e8946` | **Update documentation** | The README is rewritten to fully explain every concept above in depth: variable styles, static typing vs. inference, type conversion pitfalls, `println` vs. `fmt`, the anatomy of `go.mod`, and a full Go CLI command reference. |
-| `9eee060`, `60134df`, `8b9b20a`, `f77e782` | **Branch merges** (`feature/one` ↔ `develop` ↔ `main`) | No new code — these commits synchronize the three long-lived branches so that documentation and code fixes made on one branch propagate to the others, keeping the branch graph consistent. |
-| `0693e57` | **Add new commits-details section** | The README gains this very commit-history table, turning `git log` into a guided tour. |
+| `3ee9fdb` | **Initial create, build and run go project** | The file becomes a real **Go module**: `go mod init` produces `go.mod` (`module main`, `go 1.26.5`), the project is built (`go build`), and run for the first time. The README also receives its first full pass. |
+| `aed46ac` | **Delete ugly icon** | Small housekeeping — a cosmetic README cleanup. |
+| `b6f54e0` | **Working with variables, string, int32 and format combination** | The heart of the first lesson: **variable declaration** (`var name string = "variable"`), **reassignment**, **type inference** (`var otherVariable2 = ""`), an explicit **`int32`** declaration and arithmetic, **type conversion** (`string(myIny)`), and the classic **`println` has no format verbs** pitfall. |
+| `16e8946` | **Update documentation** | The README is rewritten to explain every concept above in depth: variable styles, static typing vs. inference, type conversion pitfalls, `println` vs. `fmt`, `go.mod`, and a Go CLI command reference. |
+| `9eee060`, `60134df`, `8b9b20a`, `f77e782` | **Branch merges** (`feature/one` ↔ `develop` ↔ `main`) | No new code — these commits synchronize the three long-lived branches. |
+| `0693e57` | **Add new commits-details section** | The README gains a commit-history table, turning `git log` into a guided tour. |
 | `ec2bf4e` | **Working with float64** | Introduces `var myFloat = 6.5` and mixed-type arithmetic via explicit conversion (`float64(myIny) + myFloat`) — reinforcing that Go never implicitly widens numeric types. |
-| `7e1cbff` | **Geeting context for import fmt and reflect and working with boolean in Go** | Adds the `reflect` import and `reflect.TypeOf(...)` calls to print a variable's concrete type at runtime, plus the first `bool` variable (`myBool`). This is also where a real bug slipped in: `reflect.Type` is an interface, and the builtin `print`/`println` cannot accept it — see [Inspecting Types with `reflect`](#inspecting-types-with-reflect). |
-| `b384d25` | **Working with := Go** | Introduces the short variable declaration form, `myString := "Variable"` — the idiomatic, terse alternative to `var x = ...` inside function bodies. |
-| `01aa16e` | **working with ternary mimics** | Go has no `?:` ternary operator. This commit adds a `ternary(cond, whenTrue, whenFalse string) string` helper function so a conditional value can still be produced as a single expression and passed straight into `fmt.Println(...)`. |
-| `213fe84` | **Workint with control flow** | Adds a full `if / else if / else` chain (`if true && myBool { ... } else if myString == "X" { ... } else { ... }`), demonstrating boolean operators and Go's C-like (but parenthesis-free) conditional syntax. |
-| `4934440` | **.** | A tiny one-line tweak — no functional change worth documenting on its own, folded into the surrounding lesson. |
-| `ba3f283` | **working with []int** | Introduces Go's first **data structure**: a fixed-size array, `var myArray [3]int`, plus `len()` and indexed access/assignment. |
-| `01b0e9d` | **Go is a smart lenguaje - Invalid argument: index 4 out of bounds [0:3]compilerInvalidIndex** | Deliberately documents (as a comment) what happens when you index past an array's bounds — the Go **compiler**, not just the runtime, catches constant out-of-range indices at compile time. |
-| `6d32190` | **Working with - func make(t Type, size ...int) Type** | Introduces Go's second core data structure: a `map[string]int` built with `make`, populated with key/value pairs, and printed with `fmt.Println`. |
+| `7e1cbff` | **Geeting context for import fmt and reflect and working with boolean in Go** | Adds the `reflect` import and `reflect.TypeOf(...)` to print a variable's concrete type at runtime, plus the first `bool` variable. Also where a real bug slipped in: `reflect.Type` is an interface the builtin `print`/`println` can't accept — fixed by switching to `fmt.Println`. |
+| `b384d25` | **Working with := Go** | Introduces the short variable declaration form, `myString := "Variable"`. |
+| `01aa16e` | **working with ternary mimics** | Go has no `?:` operator. Adds a `ternary(cond, whenTrue, whenFalse string) string` helper so a conditional value can be produced as one expression. |
+| `213fe84` | **Workint with control flow** | Adds a full `if / else if / else` chain using `&&` and `==`. |
+| `4934440` | **.** | A tiny one-line tweak, folded into the surrounding lesson. |
+| `ba3f283` | **working with []int** | Introduces Go's first fixed-size data structure: `var myArray [3]int`, plus `len()` and indexed access/assignment. |
+| `01b0e9d` | **Go is a smart lenguaje - Invalid argument: index 4 out of bounds [0:3]compilerInvalidIndex** | Documents (as a comment) that indexing an array past its bounds with a constant index is a **compile-time** error, not a runtime panic. |
+| `6d32190` | **Working with - func make(t Type, size ...int) Type** | Introduces maps: `make(map[string]int)`, populated with key/value pairs and printed. |
+| `229b068` | **Add documentation** | README sync pass to catch up with the map work above. |
+| `ec34821` | **Working with map[string]int{"string": int, "string": int}** | Adds the **map literal** form, `map[string]int{"Cris": 36, "Artias": 30}` — an alternative to `make` when the initial contents are known upfront. |
+| `f615525` | **Working with ontainer/list and getting pointer context** | Brings in the standard library's `container/list` (a doubly linked list) via `list.New()` and `PushBack`, and introduces **pointers**: `myList.Back().Value` is accessed through a `*list.Element`, the first explicit exposure to Go's address-of-a-value model. |
+| `bdffddf` | **Working with for using List** | Iterates the list with a classic C-style `for i := 0; i < myList.Len(); i++ { ... }` loop — Go's *only* looping construct, reused here in its most explicit form. |
+| `4519226` | **working with for and list and map** | Extends the same `for` pattern to a map's length and adds a `for index, value := range myArray` loop, showing the **`range`** form that Go favors for iterating collections idiomatically. |
+| `6a67a4a` | **working with type - structure** | Introduces the **`struct`** keyword — Go's mechanism for custom, composite types — with a `Person{Name, Age}` type, a value-receiver method (`Greet`), a pointer-receiver method (`Birthday`), a zero-value struct, and a `[]Person` slice iterated with `range`. This is the file's first real step from *procedural scripting* toward *object-oriented-flavored* Go. |
 
-> **Reading tip:** if you want to relive the learning path, check out each commit in order (`git checkout <hash>`) and diff `hello.go` against the previous one — you'll see the file grow one Go concept at a time.
+> **Reading tip:** if you want to relive the learning path, check out each commit in order (`git checkout <hash>`) and diff `hello.go` against the previous one — you'll see the file grow one Go concept at a time, from `println("Hi")` all the way to custom types with methods.
 
 ## Prerequisites
 
@@ -105,7 +118,7 @@ Gophers/
 ├── LICENSE
 ├── README.md
 ├── go.mod       # module definition (module "main", go 1.26.5)
-├── hello.go     # sandbox program: variables, types, control flow, arrays, maps
+├── hello.go     # sandbox program: variables, control flow, data structures, structs & methods
 └── main         # compiled binary produced by `go build` (safe to delete/regenerate)
 ```
 
@@ -125,7 +138,7 @@ This creates a `go.mod` file, which turns this folder into a proper Go **module*
 
 - The module's import path (here, `main`)
 - The Go version used
-- Any external dependencies (none yet — `fmt` and `reflect` are both part of the standard library, so no `require` block is needed)
+- Any external dependencies (none yet — `fmt`, `reflect`, and `container/list` are all part of the standard library, so no `require` block is needed)
 
 You only need to run this **once** per project — not before every build.
 
@@ -155,6 +168,7 @@ This compiles **and** runs the program in a single step, without leaving a binar
 package main
 
 import (
+	"container/list"
 	"fmt"
 	"reflect"
 )
@@ -179,7 +193,6 @@ func main() {
 	myIny = 10
 
 	println(name + string(myIny))
-
 	println("%s", name, myIny, "he")
 
 	fmt.Println("reflect int32", reflect.TypeOf(myIny))
@@ -193,7 +206,7 @@ func main() {
 	println(myBool)
 	fmt.Println(ternary(myBool, "The variable is true", "The variable is false"))
 
-	// variable declared and initialized abbreviated way
+	// short declaration
 	myString := "Variable"
 	fmt.Println(myString)
 
@@ -214,16 +227,57 @@ func main() {
 	var myArray [3]int
 	println(len(myArray))
 	println("Array[2]", myArray[2])
-
 	myArray[2] = 3
 	println("Before Array[2]", myArray[2])
 
-	// Data Structure: Map
+	// Data Structure: Map (via make, then via literal)
 	myMap := make(map[string]int)
 	myMap["Cris"] = 35
 	myMap["Artias"] = 20
 	myMap["John"] = 29
-	fmt.Println(myMap)
+	println(myMap)
+
+	myMap2 := map[string]int{"Cris": 36, "Artias": 30}
+	myMap2["Cris"] = 36
+	println(myMap2)
+
+	// Data Structure: container/list (doubly linked list) + pointers
+	myList := list.New()
+	myList.PushBack(1)
+	myList.PushBack(2)
+	myList.PushBack(3)
+	myList.PushBack(4)
+	println(myList.Back().Value)
+
+	// Loops (Go's only looping keyword: for)
+	for i := 0; i < myList.Len(); i++ {
+		println(i)
+	}
+	for i := 0; i < len(myMap2); i++ {
+		println(i)
+	}
+	for index, value := range myArray {
+		fmt.Println(index, value)
+	}
+
+	// Data Structure: Struct (custom type) + methods
+	cris := Person{Name: "Cris", Age: 35}
+	fmt.Println(cris)
+	fmt.Println(cris.Greet())
+
+	cris.Birthday()
+	fmt.Println("After birthday:", cris.Age)
+
+	var empty Person
+	fmt.Println(empty)
+
+	people := []Person{
+		{Name: "Artias", Age: 20},
+		{Name: "John", Age: 29},
+	}
+	for _, person := range people {
+		fmt.Println(person.Greet())
+	}
 }
 
 // ternary mimics the ?: operator Go doesn't have: a function call is an
@@ -234,44 +288,62 @@ func ternary(cond bool, whenTrue, whenFalse string) string {
 	}
 	return whenFalse
 }
+
+// Person is a custom type: a struct groups named fields under one type.
+type Person struct {
+	Name string
+	Age  int
+}
+
+// Greet uses a value receiver: p is a copy, so this method can never
+// modify the caller's original value.
+func (p Person) Greet() string {
+	return "Hi, I'm " + p.Name
+}
+
+// Birthday uses a pointer receiver: p points at the caller's original
+// Person, so p.Age++ is visible to the caller after the call returns.
+func (p *Person) Birthday() {
+	p.Age++
+}
 ```
 
 Line by line:
 
 | Line(s) | What it demonstrates |
 |---|---|
-| `package main` / `import (...)` | Every executable Go program lives in `package main` with a `func main()` entry point. Multiple standard-library imports are grouped in one parenthesized block — the idiomatic style (`gofmt` will rewrite two separate `import` lines into this form). |
+| `package main` / `import (...)` | Every executable Go program lives in `package main` with a `func main()` entry point. Multiple standard-library imports are grouped in one parenthesized block — the idiomatic style. |
 | `println("Hi, ...")` | The **built-in** `println` (lowercase, no import needed) writes to stderr — useful for quick debugging, but not meant for production output (see [Printing and Formatting Correctly](#printing-and-formatting-correctly)). |
 | `var name string = "variable"` | Explicit variable declaration: keyword, identifier, type, value. |
-| `name = "other vriable"` | Reassignment — `name` was declared with `var`, so it's mutable and can be reassigned to any value **of the same type** (`string`). |
-| `var otherVariable2 = ""` | Type is **inferred** from the value (`""` → `string`); no explicit type needed. |
-| `var myIny int32 = 7` | Explicit `int32` declaration. Go's default int type is platform-sized `int`, so `int32` here is deliberate/explicit. |
-| `myIny = myIny * 10` | Arithmetic on typed integers works as expected. |
+| `name = "other vriable"` | Reassignment — `name` was declared with `var`, so it's mutable and can be reassigned to any value **of the same type**. |
+| `var otherVariable2 = ""` | Type is **inferred** from the value (`""` → `string`). |
+| `var myIny int32 = 7` | Explicit `int32` declaration; Go's default int type is platform-sized `int`, so `int32` here is deliberate. |
 | `println(name + string(myIny))` | **Type conversion**: `string(myIny)` converts the `int32` to its Unicode code point as a string, not its decimal digits — see [Pitfalls](#pitfalls-already-in-this-file-and-how-to-fix-them). |
-| `println("%s", name, myIny, "he")` | **Common pitfall**: `println` does **not** support `Printf`-style verbs like `%s`. It just prints each argument space-separated, so `%s` is printed literally, not substituted. |
-| `fmt.Println("reflect int32", reflect.TypeOf(myIny))` | **Runtime type inspection**: `reflect.TypeOf` returns the concrete `reflect.Type` of any value (here, `int32`). Note it's printed with `fmt.Println`, not the builtin `println` — see [Inspecting Types with `reflect`](#inspecting-types-with-reflect) for why that distinction matters. |
-| `var myFloat = 6.5` / `float64(myIny) + myFloat` | Introduces `float64` (Go's default floating-point type) and shows that mixed-type arithmetic (`int32 + float64`) requires an **explicit conversion** — Go never widens numeric types implicitly. |
-| `var myBool bool = true` | Explicit `bool` declaration; Go's boolean type has exactly two values, `true` and `false` — no truthy/falsy coercion from other types. |
-| `ternary(myBool, "...", "...")` | Calls the hand-rolled `ternary` helper (defined below `main`) to get a conditional string in one expression — see [No Ternary Operator](#no-ternary-operator--and-how-to-fake-one). |
-| `myString := "Variable"` | **Short variable declaration** (`:=`) — declares and initializes in one step, inferring the type. Only legal inside function bodies. |
+| `println("%s", name, myIny, "he")` | **Common pitfall**: `println` has no `Printf`-style verbs — `%s` prints literally. |
+| `reflect.TypeOf(myIny)` | **Runtime type inspection** — returns a `reflect.Type` interface, which is why it's printed with `fmt.Println`, not builtin `println` (see [Inspecting Types with `reflect`](#inspecting-types-with-reflect)). |
+| `var myFloat = 6.5` / `float64(myIny) + myFloat` | Introduces `float64` and shows mixed-type arithmetic requires an **explicit conversion**. |
+| `var myBool bool = true` | Explicit `bool` declaration; exactly two values, no truthy/falsy coercion. |
+| `ternary(myBool, "...", "...")` | Calls the hand-rolled `ternary` helper to get a conditional value in one expression — see [No Ternary Operator](#no-ternary-operator--and-how-to-fake-one). |
+| `myString := "Variable"` | **Short variable declaration** — declares and initializes in one step. Function bodies only. |
 | `const myConstant = "Constant"` | Declares a compile-time **constant** — see [Constants](#constants). |
-| `if true && myBool { ... } else if ... else { ... }` | A full **control-flow** chain using the `&&` logical AND and `==` comparison operators — see [Control Flow](#control-flow-if--else-if--else). |
-| `var myArray [3]int` / `myArray[2] = 3` | A fixed-size **array** of 3 integers, zero-valued (`[0 0 0]`) until assigned — see [Arrays](#arrays). |
-| `myMap := make(map[string]int)` | Creates a **map** (hash table) using the built-in `make` function, then populates it with three key/value pairs — see [Maps](#maps). |
-| `func ternary(...) string { ... }` | A package-level function declared *after* `main` — Go doesn't require forward declarations; the compiler resolves all top-level names in a single pass. |
+| `if true && myBool { ... } else if ... else { ... }` | A full **control-flow** chain using `&&` and `==` — see [Control Flow](#control-flow-if--else-if--else). |
+| `var myArray [3]int` / `myArray[2] = 3` | A fixed-size **array**, zero-valued until assigned — see [Arrays](#arrays). |
+| `make(map[string]int)` / `map[string]int{...}` | Two ways to create a **map**: via `make` (empty, populate later) or a **map literal** (populated at creation) — see [Maps](#maps). |
+| `list.New()` / `PushBack` / `.Back().Value` | The standard library's `container/list`, a doubly linked list, and Go's first explicit **pointer** exposure (`*list.Element`) — see [`container/list`](#containerlist-a-doubly-linked-list). |
+| `for i := 0; i < N; i++` / `for index, value := range x` | Go's **only** looping keyword, `for`, in its C-style and `range` forms — see [Loops](#loops-gos-only-looping-keyword-for). |
+| `type Person struct { ... }` | Declares a custom composite type — see [Structs](#structs-custom-types). |
+| `func (p Person) Greet() string` / `func (p *Person) Birthday()` | Methods with value vs. pointer **receivers** — see [Methods and Receivers](#methods-and-receivers-value-vs-pointer). |
+| `func ternary(...)` / `type Person struct{...}` declared after `main` | Go doesn't require forward declarations; the compiler resolves all package-level names in a single pass, so helper types/functions can live below the code that uses them. |
 
 ### Pitfalls Already in This File (and How to Fix Them)
 
-1. **`string(int32)` doesn't produce digits.** `string(myIny)` where `myIny` is `10` converts the *rune* with code point 10 (a newline character), not the text `"10"`. To get `"10"`, use `strconv.Itoa(int(myIny))` (or `fmt.Sprintf("%d", myIny)`). Modern Go toolchains (`go vet`) flag this exact pattern with *"conversion from int32 to string yields a string of one rune"*.
-2. **`println` has no format verbs.** `println("%s", name, myIny, "he")` prints the literal string `%s`, then each remaining argument — it does **not** substitute `%s` with `name`. To format output, use `fmt.Printf`/`fmt.Sprintf` from the standard library instead:
-
-   ```go
-   fmt.Printf("%s %d\n", name, myIny)
-   ```
-3. **`println`/`print` are debugging-only builtins**, not part of the language spec's guaranteed API — they write to stderr, have no formatting, and their exact behavior can vary by Go implementation. Idiomatic Go programs use `fmt.Println`/`fmt.Printf` for real output.
-4. **The builtin `print`/`println` can't take arbitrary types.** An earlier version of this file tried `print("reflect int32", reflect.TypeOf(myIny))`, which fails to compile: the builtin printers only accept boolean, numeric, string, or pointer arguments — not the `reflect.Type` interface value returned by `reflect.TypeOf`. The fix is to use `fmt.Println` instead, which accepts any type.
-5. **`if` is a statement, not an expression.** An earlier attempt wrote `println(if myBool { "true" })` — a syntax error, since Go requires every function argument to be an expression, and `if` never produces a value. The fix (now in the file) is the `ternary` helper: a function *call* is an expression, so `ternary(cond, a, b)` can be dropped straight into `fmt.Println(...)`.
-6. **Indexing an array out of bounds is a compile-time error when the index is a constant.** `myArray[4]` on a `[3]int` array fails with *"invalid argument: index 4 out of bounds [0:3]"* — caught by the compiler before the program ever runs, because array length is part of the type (`[3]int` and `[4]int` are different types). This is different from a `slice`, where an out-of-range constant index can't always be caught statically and instead panics at runtime.
+1. **`string(int32)` doesn't produce digits.** `string(myIny)` where `myIny` is `10` converts the *rune* with code point 10 (a newline character), not the text `"10"`. Use `strconv.Itoa(int(myIny))` or `fmt.Sprintf("%d", myIny)` instead. Modern `go vet` flags this exact pattern.
+2. **`println` has no format verbs.** `println("%s", name, myIny, "he")` prints the literal string `%s`, then each remaining argument. Use `fmt.Printf("%s %d\n", name, myIny)` for real formatting.
+3. **`println`/`print` are debugging-only builtins**, not part of the language spec's guaranteed API. Idiomatic Go uses `fmt.Println`/`fmt.Printf` for real output.
+4. **The builtin `print`/`println` can't reliably take arbitrary types.** Per the language spec, they only guarantee support for boolean, numeric, string, and pointer arguments. `reflect.TypeOf(myIny)` returns an interface value (`reflect.Type`), so it's printed with `fmt.Println` instead. Likewise, `println(myMap)` and `println(myList.Back().Value)` in this file happen to compile under the `gc` toolchain (which is more permissive than the spec requires), but they aren't portable — prefer `fmt.Println` for maps, structs, and interface values everywhere.
+5. **`if` is a statement, not an expression.** `println(if myBool { "true" })` is a syntax error, since every function argument must be an expression and `if` never produces a value. The fix is the `ternary` helper: a function *call* is an expression, so `ternary(cond, a, b)` drops straight into `fmt.Println(...)`.
+6. **Indexing an array out of bounds is a compile-time error when the index is a constant.** `myArray[4]` on a `[3]int` fails with *"invalid argument: index 4 out of bounds [0:3]"* — caught before the program runs, because array length is part of the type. A *variable* out-of-range index instead panics at runtime.
+7. **`list.Element.Value` is `any` (`interface{}`).** `container/list` stores values as `any`, so retrieving one back (`myList.Back().Value`) loses static type information — using it as a specific type again requires a type assertion (`v := myList.Back().Value.(int)`), which panics if the stored value isn't actually an `int`. This is the classic trade-off of pre-generics-style containers versus a typed slice.
 
 ## Go Language Concepts
 
@@ -286,7 +358,7 @@ name := "variable"           // short declaration (function bodies only, infers 
 var name string              // zero-value declaration (empty string "")
 ```
 
-`:=` (short variable declaration) can only be used inside function bodies, not at package level, and it requires at least one new variable on the left-hand side. It's the form most idiomatic Go code reaches for by default — `var` is reserved for cases where you want the zero value, need an explicit type that differs from the inferred one, or are declaring at package scope.
+`:=` can only be used inside function bodies and requires at least one new variable on the left-hand side. It's the form most idiomatic Go code reaches for by default — `var` is reserved for the zero value, an explicit differing type, or package-level scope.
 
 ### Static Typing and Type Inference
 
@@ -297,7 +369,7 @@ var myIny int32 = 7
 // myIny + name        // compile error: mismatched types int32 and string
 ```
 
-When you omit the type (`var x = 5` or `x := 5`), Go **infers** it from the right-hand side at compile time — this is still static typing, just with less typing (pun intended). It is *not* the same as dynamic typing: the inferred type is fixed for the variable's lifetime.
+When you omit the type (`var x = 5` or `x := 5`), Go **infers** it from the right-hand side at compile time — still static typing, just with less typing.
 
 ### Type Conversion
 
@@ -310,24 +382,20 @@ s2 := strconv.Itoa(int(i)) // "65" — converts the number to its decimal text
 f := float64(i)            // 65 — numeric widening conversion
 ```
 
-`string(someInt)` is a common beginner trap (see [Pitfall #1](#pitfalls-already-in-this-file-and-how-to-fix-them)): it treats the integer as a **Unicode code point**, not as text to print. For number-to-text conversion, always reach for `strconv` or `fmt.Sprintf("%d", ...)`.
-
-This same rule is why `float64(myIny) + myFloat` needs the explicit `float64(...)` — Go will not automatically promote an `int32` to a `float64` for you, even though the conversion is "safe."
+`string(someInt)` is a common beginner trap (see [Pitfall #1](#pitfalls-already-in-this-file-and-how-to-fix-them)): it treats the integer as a **Unicode code point**, not text. This same rule is why `float64(myIny) + myFloat` needs the explicit `float64(...)` — Go will not auto-promote an `int32` to a `float64`.
 
 ### Printing and Formatting Correctly
 
 | Function | Import | Formatting? | Destination | Typical use |
 |---|---|---|---|---|
-| `println(...)` / `print(...)` | none (builtin) | No | stderr | Quick, throwaway debugging; only boolean/numeric/string/pointer args |
+| `println(...)` / `print(...)` | none (builtin) | No | stderr | Quick debugging; spec-guaranteed only for bool/numeric/string/pointer args |
 | `fmt.Println(...)` | `fmt` | No (adds spaces + newline) | stdout | Simple output of arbitrary types |
 | `fmt.Printf(format, ...)` | `fmt` | Yes (`%s`, `%d`, `%v`, `%T`, ...) | stdout | Formatted output |
 | `fmt.Sprintf(format, ...)` | `fmt` | Yes | returns a `string` | Building formatted strings |
 
-Rule of thumb: reach for `fmt` for anything beyond a one-off debug print of a primitive value — it's part of every idiomatic Go program, and it's the only option once interfaces, structs, or `reflect.Type` values enter the picture (see [Pitfall #4](#pitfalls-already-in-this-file-and-how-to-fix-them)).
+Rule of thumb: reach for `fmt` for anything beyond a one-off debug print of a primitive value — it's the only portable option once maps, structs, or interface values (like `reflect.Type` or `list.Element.Value`) enter the picture.
 
 ### Inspecting Types with `reflect`
-
-The standard library's [`reflect`](https://pkg.go.dev/reflect) package lets a program examine its own values and types at **runtime**:
 
 ```go
 import "reflect"
@@ -336,9 +404,9 @@ var myIny int32 = 7
 fmt.Println(reflect.TypeOf(myIny)) // prints: int32
 ```
 
-`reflect.TypeOf(v)` returns a `reflect.Type` — an **interface**, not a primitive value. That's why it must be printed with `fmt.Println`/`fmt.Printf` rather than the builtin `println`, which only understands a fixed set of primitive argument kinds (see [Pitfall #4](#pitfalls-already-in-this-file-and-how-to-fix-them)).
+`reflect.TypeOf(v)` returns a `reflect.Type` — an **interface**, not a primitive — which is why it's printed with `fmt.Println` rather than builtin `println` (see [Pitfall #4](#pitfalls-already-in-this-file-and-how-to-fix-them)).
 
-`reflect` is powerful but "expert-level" Go: it bypasses static typing and compile-time guarantees, trading them for runtime flexibility. It's invaluable for writing generic serializers, ORMs, and testing helpers — but idiomatic Go code favors interfaces and generics over `reflect` wherever possible, reserving it for the cases where the type truly isn't known until runtime.
+`reflect` bypasses static typing for runtime flexibility — invaluable for serializers, ORMs, and test helpers, but idiomatic Go favors interfaces and generics wherever the type can be known at compile time instead.
 
 ### Constants
 
@@ -346,11 +414,11 @@ fmt.Println(reflect.TypeOf(myIny)) // prints: int32
 const myConstant = "Constant"
 ```
 
-`const` declares a value that's fixed at **compile time** and can never be reassigned — attempting `myConstant = "other"` is a compile error. Unlike `var`:
+`const` declares a value fixed at **compile time**; reassignment is a compile error. Unlike `var`:
 
 - Constants can only hold basic types (numbers, strings, booleans, runes) — never slices, maps, or structs.
-- Untyped constants (like `const Pi = 3.14159`) adopt whatever type context they're used in, which lets the same constant be used as an `int32` in one expression and a `float64` in another without an explicit conversion.
-- Multiple related constants are often grouped with `iota` for auto-incrementing enums — a pattern worth exploring once this file's basics feel comfortable.
+- Untyped constants (`const Pi = 3.14159`) adopt whatever type context they're used in.
+- Related constants are often grouped with `iota` for auto-incrementing enums.
 
 ### Control Flow: `if` / `else if` / `else`
 
@@ -364,22 +432,17 @@ if true && myBool {
 }
 ```
 
-Key differences from C-family languages:
-
-- **No parentheses** around the condition (`if (true && myBool)` would still compile, but `gofmt` strips the parens — Go style omits them).
-- **Mandatory braces**, even for a single-statement body — there's no bare `if x println(x)`.
-- The condition must be a `bool` expression; there's no implicit conversion from `0`/`""`/`nil` to `false` like in some other languages.
-- `&&` (logical AND) and `||` (logical OR) short-circuit, just as you'd expect; `==` compares values of comparable types.
+Key differences from C-family languages: **no parentheses** around the condition, **mandatory braces** even for one statement, and the condition must be a real `bool` — no implicit `0`/`""`/`nil` → `false` coercion. `&&`/`||` short-circuit as expected.
 
 ### No Ternary Operator — and How to Fake One
 
-Go deliberately omits the `?:` ternary operator found in C, JavaScript, and many other languages — the language spec favors explicit `if` statements for readability over compact conditional expressions. Since `if` is a **statement**, it cannot be used as a function argument:
+Go deliberately omits `?:`. Since `if` is a **statement**, it can't be a function argument:
 
 ```go
 println(if myBool { "true" })  // ✗ syntax error: unexpected keyword if
 ```
 
-This file's fix is a small helper that turns the conditional into a **function call**, which *is* a valid expression:
+This file's fix wraps the conditional in a **function call**, which *is* an expression:
 
 ```go
 func ternary(cond bool, whenTrue, whenFalse string) string {
@@ -392,51 +455,128 @@ func ternary(cond bool, whenTrue, whenFalse string) string {
 fmt.Println(ternary(myBool, "The variable is true", "The variable is false"))
 ```
 
-Other common ways to get the same effect for a single value:
-
-```go
-// A local variable set inside an if/else
-msg := "false"
-if myBool {
-	msg = "true"
-}
-
-// A map lookup keyed by the boolean (works well for a fixed set of outcomes)
-labels := map[bool]string{true: "true", false: "false"}
-fmt.Println(labels[myBool])
-```
+Other common alternatives for a single value: a local variable set inside `if`/`else`, or a `map[bool]string{true: "...", false: "..."}` lookup.
 
 ### Arrays
 
 ```go
-var myArray [3]int      // [0 0 0] — a fixed-size, zero-valued array of length 3
+var myArray [3]int      // [0 0 0] — fixed-size, zero-valued
 println(len(myArray))   // 3
-myArray[2] = 3           // assign by index (0-based)
-println(myArray[2])      // 3
+myArray[2] = 3
 ```
 
-Key properties:
-
-- **Length is part of the type.** `[3]int` and `[4]int` are different, incompatible types — you can't assign one to the other or pass a `[3]int` where a `[4]int` is expected.
-- **Value semantics.** Arrays are copied by value on assignment or when passed to a function — mutating a copy never affects the original. (This is why Go code overwhelmingly prefers **slices**, `[]T`, which wrap a reference to an underlying array and support growth via `append`.)
-- **Bounds are checked.** Indexing with a constant outside `[0, len)` — e.g. `myArray[4]` on a length-3 array — is a **compile-time** error (`invalid argument: index 4 out of bounds [0:3]`) because the compiler knows the array's length statically. Indexing with a *variable* index that's out of range instead panics at **runtime**.
+- **Length is part of the type** — `[3]int` and `[4]int` are incompatible.
+- **Value semantics** — arrays copy on assignment or function call, which is why idiomatic Go usually prefers **slices** (`[]T`) for anything that needs to grow.
+- **Bounds checked at compile time** for constant indices out of range (see [Pitfall #6](#pitfalls-already-in-this-file-and-how-to-fix-them)); variable indices panic at runtime instead.
 
 ### Maps
 
 ```go
-myMap := make(map[string]int) // create an empty map[string]int
-myMap["Cris"] = 35            // insert/update by key
-myMap["Artias"] = 20
-myMap["John"] = 29
-fmt.Println(myMap)            // map[Artias:20 Cris:35 John:29]
+myMap := make(map[string]int)  // create empty, populate later
+myMap["Cris"] = 35
+
+myMap2 := map[string]int{"Cris": 36, "Artias": 30} // map literal: create + populate at once
+myMap2["Cris"] = 36                                 // still mutable afterward
 ```
 
-Key properties:
+- **`make` or a literal is required** — the zero value of a map is `nil`, and writing to a `nil` map panics (reading is safe and returns the zero value).
+- **Unordered** — iteration order via `range` is intentionally randomized; `fmt.Println` sorts keys only for display purposes.
+- **Two-value lookups**: `v, ok := myMap["Cris"]` — `ok` distinguishes "missing key" from "key present with zero value."
+- **`delete(myMap, "Cris")`** removes a key.
 
-- **`make` is required** (or a map literal, `map[string]int{"Cris": 35}`) — the zero value of a map type is `nil`, and writing to a `nil` map panics. Reading from a `nil` map, however, is safe and returns the zero value.
-- **Unordered.** `fmt.Println` on a map sorts keys for deterministic, readable output, but iteration order with `for k, v := range myMap` is intentionally randomized by the runtime — never rely on map order.
-- **Lookups return two values**: `v, ok := myMap["Cris"]` — `ok` is `false` if the key isn't present, letting you distinguish "missing key" from "key present with the zero value."
-- **Deleting** a key uses the builtin `delete(myMap, "Cris")`.
+### `container/list`: a Doubly Linked List
+
+```go
+import "container/list"
+
+myList := list.New()
+myList.PushBack(1)
+myList.PushBack(2)
+back := myList.Back() // *list.Element — a pointer
+fmt.Println(back.Value)
+```
+
+- `list.New()` returns a `*list.List` — a **pointer** to the list header, so every method (`PushBack`, `PushFront`, `Remove`, ...) mutates the same underlying list without needing to reassign the variable.
+- Each element is a `*list.Element`; `.Value` is typed `any`, so retrieving a specific type back requires a type assertion — see [Pitfall #7](#pitfalls-already-in-this-file-and-how-to-fix-them).
+- **When to reach for it:** `container/list` shines when you need O(1) insertion/removal from both ends *and* from the middle given an element pointer. For most everyday Go code, a slice (with `append`) is simpler, more cache-friendly, and idiomatic — reserve linked lists for cases with genuinely frequent middle-of-sequence mutation.
+
+### Loops: Go's Only Looping Keyword, `for`
+
+Go has exactly one looping keyword — no `while`, no `do...while` — and `for` covers every case:
+
+```go
+// 1. C-style: init; condition; post
+for i := 0; i < myList.Len(); i++ {
+	println(i)
+}
+
+// 2. Condition-only ("while" equivalent)
+for i < 10 {
+	i++
+}
+
+// 3. Infinite loop
+for {
+	break // needs an explicit exit
+}
+
+// 4. range — the idiomatic way to iterate arrays, slices, maps, strings, and channels
+for index, value := range myArray {
+	fmt.Println(index, value)
+}
+```
+
+Prefer `range` whenever you're walking a whole collection — it's shorter, avoids off-by-one bugs, and communicates *"iterate everything"* more clearly than a manually indexed C-style loop, which is better reserved for cases needing a custom stride, an early skip, or an index derived from something other than the collection itself.
+
+### Structs: Custom Types
+
+```go
+type Person struct {
+	Name string
+	Age  int
+}
+
+cris := Person{Name: "Cris", Age: 35}  // named-field literal: order-independent, self-documenting
+var empty Person                       // zero-value struct: Person{Name: "", Age: 0}
+people := []Person{                     // a slice of structs composes cleanly with everything above
+	{Name: "Artias", Age: 20},
+	{Name: "John", Age: 29},
+}
+```
+
+`struct` is Go's answer to "group related fields under one named type" — there's no `class` keyword. A struct is a value type: assigning one `Person` to another, or passing it to a function, copies all its fields (contrast with the reference-like `*list.List` above). Fields starting with an uppercase letter (`Name`, `Age`) are **exported** — visible outside the package they're defined in; lowercase fields are package-private.
+
+### Methods and Receivers: Value vs. Pointer
+
+Go doesn't have classes or inheritance, but it lets you attach functions to a type via a **receiver**, turning them into methods:
+
+```go
+// Value receiver: p is a copy. Safe, but can never mutate the original.
+func (p Person) Greet() string {
+	return "Hi, I'm " + p.Name
+}
+
+// Pointer receiver: p points at the original. Required to mutate state.
+func (p *Person) Birthday() {
+	p.Age++
+}
+```
+
+```go
+cris := Person{Name: "Cris", Age: 35}
+cris.Birthday()               // Go automatically rewrites this to (&cris).Birthday()
+fmt.Println(cris.Age)         // 36 — the mutation is visible, because Birthday had a pointer receiver
+```
+
+**Rule of thumb:**
+
+| Use a **value** receiver when... | Use a **pointer** receiver when... |
+|---|---|
+| The method doesn't need to modify the receiver | The method needs to modify the receiver's fields |
+| The struct is small (cheap to copy) | The struct is large (avoid copying overhead) |
+| You want the method to work on both values and pointers uniformly | Consistency: if *any* method on the type needs a pointer receiver, idiomatic Go uses pointer receivers for *all* of that type's methods |
+
+Go automatically takes the address of an addressable value (like a local variable `cris`) to call a pointer-receiver method, so you rarely need to write `(&cris).Birthday()` yourself — but this auto-addressing does **not** happen for values stored in a map or returned from a function, which is a common source of "cannot call pointer method" compile errors.
 
 ## Understanding `go.mod`
 
@@ -464,7 +604,7 @@ module main
 go 1.26.5
 ```
 
-Note there's no `require` block: `fmt` and `reflect` are both part of the Go **standard library**, which ships with every Go installation and never needs to be declared as a dependency.
+Note there's no `require` block: `fmt`, `reflect`, and `container/list` are all part of the Go **standard library**, which ships with every Go installation and never needs to be declared as a dependency.
 
 A larger, real-world project would typically also declare a `require` block for third-party packages:
 
@@ -541,9 +681,9 @@ Both files should be committed to version control — never edit `go.sum` by han
 
 | | |
 |---|---|
-| **Purpose** | `go vet` statically analyzes code for suspicious constructs (e.g. wrong `Printf` verbs, the `string(int32)` conversion pattern); `go fmt` rewrites files to Go's canonical formatting |
+| **Purpose** | `go vet` statically analyzes code for suspicious constructs (wrong `Printf` verbs, the `string(int32)` conversion pattern); `go fmt` rewrites files to Go's canonical formatting |
 | **When to run** | `go vet ./...` before committing to catch bugs like the pitfalls in [this file](#pitfalls-already-in-this-file-and-how-to-fix-them); `gofmt -w .` (or `go fmt ./...`) to auto-format |
-| **Notes** | `go vet` only flags misused format verbs and suspicious conversions in `fmt`-family and builtin-conversion contexts — it will not, for example, catch a semantic ternary-as-statement mistake, since that's a parse error the compiler itself already rejects |
+| **Notes** | `go vet` only flags misused format verbs and suspicious conversions in `fmt`-family and builtin-conversion contexts — a genuine parse error (like `if` used as an expression) is instead rejected by the compiler itself, before `vet` ever runs |
 
 ## Typical Workflow
 
@@ -573,6 +713,8 @@ go build
 | `invalid argument: index N out of bounds [0:len]` | A constant index is used past a fixed-size array's declared length | Use an index within `[0, len(array))`, or switch to a slice with `append` if the size needs to grow |
 | `unexpected keyword if, expected expression` | Trying to use `if` as if it were an expression (e.g. inside a function call) | Move the conditional to its own statement, or wrap it in a helper function — see [No Ternary Operator](#no-ternary-operator--and-how-to-fake-one) |
 | `<value> (variable of type reflect.Type) is not a valid type for a builtin argument` | Passing a `reflect.Type` (or any non-primitive/interface value) to builtin `print`/`println` | Use `fmt.Println`/`fmt.Printf` instead — they accept any type |
+| `interface conversion: interface {} is X, not Y` | Type-asserting a `list.Element.Value` (or any `any`) to the wrong concrete type | Use the two-value form, `v, ok := element.Value.(int)`, and check `ok` before trusting `v` |
+| `cannot call pointer method on X` / `cannot take the address of X` | Calling a pointer-receiver method on a value that isn't addressable (e.g. a map value, or a literal) | Store the value in a local variable first, or make the collection hold pointers (`[]*Person`) instead of values |
 
 ## License
 
