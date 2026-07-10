@@ -88,7 +88,11 @@ func main() {
 	myMap["Cris"] = 35
 	myMap["Artias"] = 20
 	myMap["John"] = 29
-	fmt.Println(myMap)
+	println(myMap)
+
+	myMap2 := map[string]int{"Cris": 36, "Artias": 30}
+	myMap2["Cris"] = 36
+	println(myMap2)
 
 }
 
