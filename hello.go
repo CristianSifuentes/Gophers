@@ -61,7 +61,7 @@ func main() {
 	fmt.Println(myConstant)
 
 	//Control Flow
-	if true {
+	if true && myBool {
 		println("True")
 	} else if myString == "X" {
 		println("myString = X")
