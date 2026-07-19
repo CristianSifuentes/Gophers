@@ -34,6 +34,12 @@ This repository is a hands-on, commit-by-commit journey through core Go fundamen
   - [Loops: Go's Only Looping Keyword, `for`](#loops-gos-only-looping-keyword-for)
   - [Structs: Custom Types](#structs-custom-types)
   - [Methods and Receivers: Value vs. Pointer](#methods-and-receivers-value-vs-pointer)
+- [Advanced Go Concepts](#advanced-go-concepts)
+  - [Advanced Concurrency Patterns](#advanced-concurrency-patterns)
+  - [High-Performance Memory Management](#high-performance-memory-management)
+  - [Type System Mastery & Generics](#type-system-mastery--generics)
+  - [Runtime Metaprogramming & Optimization](#runtime-metaprogramming--optimization)
+  - [Advanced Error Handling](#advanced-error-handling)
 - [Understanding `go.mod`](#understanding-go-mod)
   - [Key Elements](#key-elements)
   - [Example `go.mod` File](#example-go-mod-file)
@@ -577,6 +583,25 @@ fmt.Println(cris.Age)         // 36 — the mutation is visible, because Birthda
 | You want the method to work on both values and pointers uniformly | Consistency: if *any* method on the type needs a pointer receiver, idiomatic Go uses pointer receivers for *all* of that type's methods |
 
 Go automatically takes the address of an addressable value (like a local variable `cris`) to call a pointer-receiver method, so you rarely need to write `(&cris).Birthday()` yourself — but this auto-addressing does **not** happen for values stored in a map or returned from a function, which is a common source of "cannot call pointer method" compile errors.
+
+## Advanced Go Concepts
+
+Beyond basic syntax, building high-performance, scalable systems in Go means writing code that aligns with **mechanical sympathy** — how the runtime's scheduler, memory model, and concurrency primitives actually behave. Each concept below lives in its own runnable package under [`advanced/`](./advanced), so it can be built, run, and studied independently: `go run ./advanced/<package>`.
+
+### Advanced Concurrency Patterns
+
+Code: [`advanced/concurrency/main.go`](./advanced/concurrency/main.go)
+
+Go's concurrency shines when goroutines are orchestrated systematically rather than launched arbitrarily.
+
+- **Context Propagation** — `context.Context` manages request scopes, carries metadata, and broadcasts cancellation down deep call trees. Blocking operations should always honor `ctx.Done()` to avoid goroutine leaks.
+- **Worker Pools** — a fixed set of worker goroutines pulling from a shared, buffered channel bounds concurrency and prevents unbounded resource consumption, regardless of how many jobs are queued.
+- **The `select` Multiplexer** — adding a `default` case makes a channel operation non-blocking; `select` is also how timeout timers, cancellation channels, and data channels get multiplexed cleanly in one statement.
+- **Pipeline Patterns** — independent processing stages connected by channels (`generate -> square -> print` in the example) let data stream through concurrently, each stage on its own goroutine.
+
+```bash
+go run ./advanced/concurrency
+```
 
 ## Understanding `go.mod`
 
