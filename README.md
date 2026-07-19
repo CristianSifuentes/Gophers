@@ -647,6 +647,19 @@ go run ./advanced/reflection
 go run -race ./advanced/reflection
 ```
 
+### Advanced Error Handling
+
+Code: [`advanced/errors/main.go`](./advanced/errors/main.go)
+
+Idiomatic Go treats errors as values rather than throwing exceptions.
+
+- **Error Wrapping** — `fmt.Errorf("...: %w", err)` adds structural context to an error while building a trackable chain that never destroys the root cause (`loadProfile` wraps `lookupUser`'s error, which wraps the `ErrNotFound` sentinel).
+- **Unwrapping & Inspection** — `errors.Is` checks for a specific error marker anywhere in the chain (`ErrNotFound`); `errors.As` casts an error value into a specific custom error type (`*ValidationError`) so its structured fields can be recovered.
+
+```bash
+go run ./advanced/errors
+```
+
 ## Understanding `go.mod`
 
 The `go.mod` file is the **core of any Go project**. It sits at the root of the project and defines the **module** — a logical unit that groups your packages together. Its main purpose is to manage dependencies and versioning in a portable, reproducible way.
