@@ -603,6 +603,21 @@ Go's concurrency shines when goroutines are orchestrated systematically rather t
 go run ./advanced/concurrency
 ```
 
+### High-Performance Memory Management
+
+Code: [`advanced/memory/main.go`](./advanced/memory/main.go)
+
+Optimizing allocations lowers Garbage Collection (GC) overhead and improves throughput.
+
+- **Heap vs. Stack Analysis** — run `go build -gcflags="-m" ./advanced/memory` to see which variables "escape to the heap." Minimizing heap allocations reduces both GC pressure and cache misses.
+- **Memory Reuse** — `sync.Pool` caches and reuses heavily allocated structures (buffers, decoders, etc.), keeping the memory footprint stable under traffic spikes instead of allocating fresh on every request.
+- **Data Semantics** — value receivers copy the receiver (cheap for small structs, and enforce immutability by default); pointer receivers mutate shared state in place and avoid copying large structures.
+
+```bash
+go run ./advanced/memory
+go build -gcflags="-m" ./advanced/memory
+```
+
 ## Understanding `go.mod`
 
 The `go.mod` file is the **core of any Go project**. It sits at the root of the project and defines the **module** — a logical unit that groups your packages together. Its main purpose is to manage dependencies and versioning in a portable, reproducible way.
