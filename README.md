@@ -632,6 +632,21 @@ Go relies heavily on implicit interfaces and explicit parameterization for reusa
 go run ./advanced/generics
 ```
 
+### Runtime Metaprogramming & Optimization
+
+Code: [`advanced/reflection/main.go`](./advanced/reflection/main.go)
+
+When static compilation falls short, Go provides runtime hooks to inspect behavior.
+
+- **Reflection** — the `reflect` package enables dynamic code such as the custom struct-tag parser here (`describeFields`), which reads a struct's fields and `tag:"..."` metadata at runtime. Used sparingly, since reflection bypasses compile-time safety and adds runtime cost.
+- **`go generate` & Tooling** — the `//go:generate` directive automates boilerplate code creation via external tools driven by code-generation annotations.
+- **The Race Detector** — compiling/testing with `-race` dynamically detects unsynchronized access to shared memory (see `racyExample`) before it causes production bugs.
+
+```bash
+go run ./advanced/reflection
+go run -race ./advanced/reflection
+```
+
 ## Understanding `go.mod`
 
 The `go.mod` file is the **core of any Go project**. It sits at the root of the project and defines the **module** — a logical unit that groups your packages together. Its main purpose is to manage dependencies and versioning in a portable, reproducible way.
