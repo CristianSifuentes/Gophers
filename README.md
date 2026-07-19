@@ -618,6 +618,20 @@ go run ./advanced/memory
 go build -gcflags="-m" ./advanced/memory
 ```
 
+### Type System Mastery & Generics
+
+Code: [`advanced/generics/main.go`](./advanced/generics/main.go)
+
+Go relies heavily on implicit interfaces and explicit parameterization for reusable architecture.
+
+- **Type-Safe Generics** — generic constraints (Go 1.18+) build abstract data structures and algorithmic helpers (`Sum[T Number]`, `Stack[T any]`) without falling back to `interface{}` and its runtime type assertions.
+- **Interface Segregation** — tiny, single-method interfaces like `Named` and `Aged` (mirroring `io.Reader`/`io.Writer`) allow flexible decoupling, easy mocking, and strong component testability.
+- **Type Assertions & Switches** — a type switch (`classify`) safely extracts concrete types from an `any` payload, unpacking unpredictable data at runtime without panicking.
+
+```bash
+go run ./advanced/generics
+```
+
 ## Understanding `go.mod`
 
 The `go.mod` file is the **core of any Go project**. It sits at the root of the project and defines the **module** — a logical unit that groups your packages together. Its main purpose is to manage dependencies and versioning in a portable, reproducible way.
